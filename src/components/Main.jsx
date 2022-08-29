@@ -1,5 +1,5 @@
 //  Импортируем библиотеки  //
-import React from 'react';
+import React, {useState, useEffect} from 'react'
 
 //  Импортируем комоненты API и карточки  //
 import { api } from '../utils/api';
@@ -9,12 +9,12 @@ import Card from './Card';
 //  Вызываем хуки для работы с профилем и карточками  //
 
 const Main = ({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) => {
-  const [userAvatar, setUserAvatar] = React.useState('');
-  const [userName, setUserName] = React.useState('');
-  const [userDescription, setUserDescription] = React.useState('');
-  const [cards, setCards] = React.useState([]);
+  const [userAvatar, setUserAvatar] = useState('');
+  const [userName, setUserName] = useState('');
+  const [userDescription, setUserDescription] = useState('');
+  const [cards, setCards] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     api
       .getProfile()
       .then((res) => {
