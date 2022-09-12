@@ -1,4 +1,5 @@
 .element__button-delete {
+/*  display: none; */
   width: 18px;
   height: 19px;
   padding: 0;
@@ -6,7 +7,11 @@
   background: none;
   cursor: pointer;
   background-image: url('../../../images/button-delete.svg');
+  background-repeat: no-repeat;
+  background-color: transparent;
   position: absolute;
+  flex-shrink: 0;
+  transition: all 0.2s ease-in;
   top: 20px;
   right: 20px;
   z-index: 1;

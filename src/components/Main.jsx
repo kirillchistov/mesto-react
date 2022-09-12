@@ -1,37 +1,26 @@
 //  Импортируем библиотеки  //
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 
-//  Импортируем комоненты API и карточки  //
-import { api } from '../utils/api';
+//  Импортируем комоненты  карточки, API здесь не нужен  //
+//  import { api } from '../utils/api';  //
 import Card from './Card';
+
+//  Импортируем контекст текущего пользователя  //
+import CurrentUserContext from "../contexts/CurrentUserContext";
+
 /* import userAvatar from '../images/avatar.jpg'; */
 
 //  Вызываем хуки для работы с профилем и карточками  //
 
-const Main = ({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) => {
-  const [userAvatar, setUserAvatar] = useState('');
-  const [userName, setUserName] = useState('');
-  const [userDescription, setUserDescription] = useState('');
-  const [cards, setCards] = useState([]);
+const Main = ({ onEditProfile, onAddPlace, onEditAvatar, onCardClick, onCardLike, onCardDelete, cards }) => {
 
-  useEffect(() => {
-    api
-      .getProfile()
-      .then((res) => {
-        setUserName(res.name);
-        setUserDescription(res.about);
-        setUserAvatar(res.avatar);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    api
-      .getCards()
-      .then((res) => setCards(...cards, res))
-      .catch((err) => console.log(err));
-  }, []);
-
+  //  создаем контекст данных профиля текущего пользователя  //
+  const profileContext = useContext(CurrentUserContext);
+  //  Вместо 3 стейт-переменных сделаем одну из контекста  //
+  const { name, avatar, about } = profileContext;
+  
+//  Перенесли все, что касается cards в App  //  
+  
 //  Возвращаем JSX-код блока main  //
 //  В галерею карточек вставляем массив карточек с сервера  //
 
@@ -39,17 +28,17 @@ const Main = ({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) => {
     <main className="content">
       <section className="profile">
         <div className="profile__image">
-          <img className="profile__avatar" src={userAvatar} alt="Аватар" title="Аватар" />
+          <img className="profile__avatar" src={avatar} alt="Аватар" title="Аватар" />
           <div className="profile__avatar-edit" onClick={onEditAvatar}></div>
         </div>
 
         <div className="profile__info">
           <div className="profile__user">
-            <h1 className="profile__name">{userName}</h1>
+            <h1 className="profile__name">{name ?? 'Полив Кустов'}</h1>
             <button className="profile__button profile__button-edit" type="button" 
               onClick={onEditProfile} aria-label="Редактировать профиль"></button>
           </div>
-          <p className="profile__job">{userDescription}</p>
+          <p className="profile__job">{about ?? 'Исследователь ок'}</p>
         </div>
         <button className="profile__button profile__button-add" type="button"
           onClick={onAddPlace} aria-label="Добавить место"></button>
@@ -58,8 +47,16 @@ const Main = ({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) => {
       <section className="gallery">
         <ul className="elements">
           {cards.map((card) => (
-            <Card name={card.name} key={card._id} link={card.link}
-              likesCount={card.likes.length} onCardClick={onCardClick} card={card} />
+            <Card name={card.name}
+                  key={card._id}
+                  title={card.name}
+                  link={card.link}
+                  likesCount={card.likes.length}
+                  onCardClick={onCardClick}
+                  onCardLike={onCardLike}
+                  onCardDelete={onCardDelete}
+                  card={card}
+            />
           ))}
         </ul>
       </section>

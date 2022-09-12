@@ -9,23 +9,23 @@ export default class Api {
 
     //  Обрабатываем ответ сервера и, если не ОК, выводим реджектим с ошибкой  //
     _handleServerResponse(res) {
-    return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
-    }
-
-    //  Получаем доступные карточки мест с сервера методом GET  //
-    getCards() {
-        this._cards = fetch(`${this._baseUrl}/cards`, {
-        headers: this._headers,
-        }).then(this._handleServerResponse);
-        return this._cards;
+        return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
     }
 
     //  Получаем данные профиля с сервера методом GET  //
     getProfile() {
-        this._profileInfo = fetch(`${this._baseUrl}/users/me`, {
-        headers: this._headers,
-        }).then(this._handleServerResponse);
-        return this._profileInfo;
+//        this._profileInfo = fetch(`${this._baseUrl}/users/me`, {  //
+        return fetch(`${this._baseUrl}/users/me`, 
+            {headers: this._headers,}).then(this._handleServerResponse);
+//        return this._profileInfo;  //
+    }
+
+    //  Получаем доступные карточки мест с сервера методом GET  //
+    getCards() {
+//        this._cards = fetch(`${this._baseUrl}/cards`, {  //
+        return fetch(`${this._baseUrl}/cards`, 
+            {headers: this._headers,}).then(this._handleServerResponse);
+//        return this._cards;  //
     }
 
     //  Сохраняем измененные данные профиля на сервере методом PATCH  //
@@ -34,8 +34,8 @@ export default class Api {
         method: "PATCH",
         headers: this._headers,
         body: JSON.stringify({
-            name: obj.profileName,
-            about: obj.profileJob,
+            name: obj.name,
+            about: obj.about,
         }),
         }).then(this._handleServerResponse);
         return this._newProfile;
@@ -51,6 +51,11 @@ export default class Api {
         }),
         }).then(this._handleServerResponse);
         return this._newAvatar;
+    }
+    //  Помечаем, если у карточки были лайки  //
+    changeLikeCardStatus(obj, variable) {
+        this._status = variable ? this.addLike(obj) : this.deleteLike(obj);
+        return this._status;
     }
 
     //  Сохраняем данные о лайках карточки на сервере через  PUT  //
@@ -85,8 +90,8 @@ export default class Api {
     }
 
     //  Удаляем карточку с сервера через  DELETE  //
-    deleteCard(id) {
-        this._deletedCard = fetch(`${this._baseUrl}/cards/${id}`, {
+    deleteCard(obj) {
+        this._deletedCard = fetch(`${this._baseUrl}/cards/${obj._id}`, {
         method: "DELETE",
         headers: this._headers,
         }).then(this._handleServerResponse);
