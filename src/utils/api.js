@@ -12,90 +12,89 @@ export default class Api {
         return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
     }
 
-    //  Получаем данные профиля с сервера методом GET  //
-    getProfile() {
-//        this._profileInfo = fetch(`${this._baseUrl}/users/me`, {  //
-        return fetch(`${this._baseUrl}/users/me`, 
-            {headers: this._headers,}).then(this._handleServerResponse);
-//        return this._profileInfo;  //
+    //  Универсальный метод принимает урл и объект опций c хедерами  //
+    _request(url, options) {
+        return fetch(url, options).then(this._handleServerResponse)
     }
 
-    //  Получаем доступные карточки мест с сервера методом GET  //
+    //  Получаем данные профиля с сервера  //
+    getProfile() {
+        return this._request(`${this._baseUrl}/users/me`, {
+            method: "GET",
+            headers: this._headers    
+        })
+    }
+
+    //  Получаем доступные карточки мест с сервера  //
     getCards() {
-//        this._cards = fetch(`${this._baseUrl}/cards`, {  //
-        return fetch(`${this._baseUrl}/cards`, 
-            {headers: this._headers,}).then(this._handleServerResponse);
-//        return this._cards;  //
+        return this._request(`${this._baseUrl}/cards`, {
+            method: "GET",
+            headers: this._headers    
+        })
     }
 
     //  Сохраняем измененные данные профиля на сервере методом PATCH  //
     setProfile(obj) {
-        this._newProfile = fetch(`${this._baseUrl}/users/me`, {
-        method: "PATCH",
-        headers: this._headers,
-        body: JSON.stringify({
-            name: obj.name,
-            about: obj.about,
-        }),
-        }).then(this._handleServerResponse);
-        return this._newProfile;
+        return this._request(`${this._baseUrl}/users/me`, {
+            method: "PATCH",
+            headers: this._headers,
+            body: JSON.stringify({
+                name: obj.name,
+                about: obj.about,
+            })
+        })
     }
 
     //  Сохраняем измененный аватар профиля на сервере через  PATCH  //
     setAvatar(obj) {
-        this._newAvatar = fetch(`${this._baseUrl}/users/me/avatar`, {
-        method: "PATCH",
-        headers: this._headers,
-        body: JSON.stringify({
-            avatar: obj.avatar,
-        }),
-        }).then(this._handleServerResponse);
-        return this._newAvatar;
+        return this._request(`${this._baseUrl}/users/me/avatar`, {
+            method: "PATCH",
+            headers: this._headers,
+            body: JSON.stringify({
+                avatar: obj.avatar,
+            })
+        })
     }
+
     //  Помечаем, если у карточки были лайки  //
     changeLikeCardStatus(obj, variable) {
-        this._status = variable ? this.addLike(obj) : this.deleteLike(obj);
-        return this._status;
+        return variable ? this.addLike(obj) : this.deleteLike(obj);
     }
 
     //  Сохраняем данные о лайках карточки на сервере через  PUT  //
     addLike(obj) {
-        this._like = fetch(`${this._baseUrl}/cards/${obj._id}/likes`, {
-        method: "PUT",
-        headers: this._headers,
-        }).then(this._handleServerResponse);
-        return this._like;
+        return this._request(`${this._baseUrl}/cards/${obj._id}/likes`, {
+            method: "PUT",
+            headers: this._headers,
+        })
     }
 
     //  Удаляем лайк карточки с сервера через  DELETE  //
     deleteLike(obj) {
-        this._deleteLike = fetch(`${this._baseUrl}/cards/${obj._id}/likes`, {
-        method: "DELETE",
-        headers: this._headers,
-        }).then(this._handleServerResponse);
-        return this._deleteLike;
+        return this._request(`${this._baseUrl}/cards/${obj._id}/likes`, {
+            method: "DELETE",
+            headers: this._headers,
+        })
     }
 
     //  Добавляем новую карточку на сервере через  POST  //
     addCard(obj) {
-        this._addedCard = fetch(`${this._baseUrl}/cards`, {
-        method: "POST",
-        headers: this._headers,
-        body: JSON.stringify({
-            name: obj.name,
-            link: obj.link,
-        }),
-        }).then(this._handleServerResponse);
-        return this._addedCard;
+        return this._request(`${this._baseUrl}/cards`, {
+            method: "POST",
+            headers: this._headers,
+            body: JSON.stringify({
+                name: obj.name,
+                link: obj.link,
+            })
+        })
     }
 
     //  Удаляем карточку с сервера через  DELETE  //
     deleteCard(obj) {
-        this._deletedCard = fetch(`${this._baseUrl}/cards/${obj._id}`, {
-        method: "DELETE",
-        headers: this._headers,
-        }).then(this._handleServerResponse);
-        return this._deletedCard;
+        return this._request(`${this._baseUrl}/cards/${obj._id}`, {
+            method: "DELETE",
+            headers: this._headers,
+        })
     }
 }
 

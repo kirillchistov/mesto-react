@@ -1,8 +1,10 @@
 import React, {useRef} from 'react';
 import PopupWithForm from "./PopupWithForm";
+import {useForm} from "../hooks/useForm";
 
-const EditAvatarPopup = ({ isOpen, onClose, onUpdateAvatar }) => {
+const EditAvatarPopup = ({ isOpen, onClose, onUpdateAvatar, isLoading }) => {
     const inputRef = useRef();
+//    const {values, handleChange, setValues} = useForm({});  //
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -15,10 +17,12 @@ const EditAvatarPopup = ({ isOpen, onClose, onUpdateAvatar }) => {
         <PopupWithForm
             title="Обновить аватар" 
             name="edit-avatar" 
-            buttonText="Сохранить"
+            buttonText={isLoading? 'Обновляю...' : 'Обновить'}
             isOpen={isOpen} 
             onClose={onClose}
             onSubmit={handleSubmit}
+            isLoading={isLoading}
+
         >
         <fieldset className="popup__fieldset" id="profileEditAvatarFieldset">
           <label className="popup__label">

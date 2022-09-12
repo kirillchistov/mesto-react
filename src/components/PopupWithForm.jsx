@@ -14,7 +14,7 @@ const PopupWithForm = ({ title, name, isOpen, onClose, buttonText, children, onS
     <div className={`popup popup_${name} ${isOpen ? 'popup_opened' : ''}`}>
       <div className="popup__container">
       <h2 className="popup__header">{title}</h2>
-        <form className={`popup__form popup__form_${name}`} name={`${name}-form`} noValidate onSubmit={onSubmit}>
+        <form className={`popup__form popup__form_${name}`} name={`${name}-form`} onSubmit={onSubmit}>
           {children}
           <button type="submit" name="profile__save" value="Сохранить" className="popup__submit">
             {buttonText}

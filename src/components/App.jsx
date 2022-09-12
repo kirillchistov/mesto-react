@@ -5,13 +5,14 @@ import React, {useEffect, useState} from 'react'
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
-import PopupWithForm from './PopupWithForm';
+//  import PopupWithForm from './PopupWithForm';  //
 import ImagePopup from './ImagePopup';
 
 //  Добавляем импорт отдельных попапов с формой  //
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
+import ConfirmationPopup from "./ConfirmationPopup";
 
 //  Импортируем API для доступа к серверу  //
 import {api} from "../utils/api";
@@ -28,14 +29,19 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
+  const [isConfirmationPopupOpen, setIsConfirmationPopupOpen] = useState(false);
   //  создаем стейт текущего пользователя и эффект при монтировании api.getUserInfo  //
-  const [currentUser, setCurrentUser] = useState({});  
+  const [currentUser, setCurrentUser] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   //  Чтобы изменять локальный список карточек из попапа, нужно поднять стейт  //
   //  создаем стейт для работы с карточками  //
   //  переносим переменную и функцию  //
   const [selectedCard, setSelectedCard] = useState({});
   const [cards, setCards] = useState([]);
+
+  //
+  const isOpen = isEditAvatarPopupOpen || isEditProfilePopupOpen || isAddPlacePopupOpen || selectedCard.link;
 
 
   //  переносим эффект с API-запросом api.getCardList (getCards)  //
@@ -52,39 +58,72 @@ useEffect(() => {
   fetchCards();
 }, [])
 
+useEffect(() => {
+  function closeByEscape(evt) {
+    if(evt.key === 'Escape') {
+      closeAllPopups();
+    }
+  }
+  if(isOpen) {
+    document.addEventListener('keydown', closeByEscape);
+    return () => {
+      document.removeEventListener('keydown', closeByEscape);
+    }
+  }
+}, [isOpen]);
+
 
 const handleAvatarUpdate = async (obj) => {
+  setIsLoading(true);
   try {
       const avatarChanged = await api.setAvatar(obj);
       setCurrentUser(avatarChanged);
       closeAllPopups();
   } catch (e) {
       console.warn(e)
+  } finally {
+    setIsLoading(false);
   }
 }
 
   //  Добавляем обработчик в соотв-вии с пропсом onUpdateUser компонента EditProfilePopup  //
   // Внутри этого обработчика вызовите api.setUserInfo  //
   // После завершения запроса обновите стейт currentUser из полученных данных и закройте все попапы  //
-  const handleUpdateUser = async (obj) => {
-    try {
-      const changedProfile = await api.setProfile(obj);
-      setCurrentUser(changedProfile);
-      closeAllPopups();
-    } catch (e) {
-      console.warn(e);
-    }
+  /*
+const handleUpdateUser = async (obj) => {
+  try {
+    const changedProfile = await api.setProfile(obj);
+    setCurrentUser(changedProfile);
+    closeAllPopups();
+  } catch (e) {
+    console.warn(e);
   }
+}
+*/
+
+function handleUpdateUser(obj) {
+  setIsLoading(true);
+  api.setProfile(obj)
+    .then((res) => {
+      setCurrentUser(res);
+    })
+    .then(() => closeAllPopups())
+    .catch((e) => console.warn(e))
+    .finally(() => {
+      setIsLoading(false);
+    });
+}
 
 const handleAddPlace = async (obj) => {
+  setIsLoading(true);
   try {
       const newPlace = await api.addCard(obj);
       setCards([newPlace, ...cards]);
-      console.log(obj);
-      console.log(currentUser);
       closeAllPopups();
-  } catch (e) {
+  } catch(e) {
       console.warn(e)
+  } finally {
+      setIsLoading(false);
   }
 }
 
@@ -144,12 +183,14 @@ useEffect(() => {
     setIsImagePopupOpen(true);
   };
 
+
   //  Закрываем все попапы  //
   const closeAllPopups = () => {
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
     setIsImagePopupOpen(false);
+    setIsConfirmationPopupOpen(false);
     setSelectedCard({});
   };
 
@@ -178,16 +219,19 @@ useEffect(() => {
           isOpen={isEditProfilePopupOpen} 
           onClose={closeAllPopups}
           onUpdateUser={handleUpdateUser}
+          isLoading={isLoading}
         />
         <AddPlacePopup 
           isOpen={isAddPlacePopupOpen} 
           onClose={closeAllPopups} 
           onAddPlace={handleAddPlace}
+          isLoading={isLoading}
         />
         <EditAvatarPopup
           isOpen={isEditAvatarPopupOpen}
           onClose={closeAllPopups}
           onUpdateAvatar={handleAvatarUpdate}
+          isLoading={isLoading}
         />
 
         <ImagePopup 
@@ -196,12 +240,11 @@ useEffect(() => {
           isOpen={isImagePopupOpen} 
         />
 
-        <PopupWithForm
-          title={'Вы уверены?'}
-          name={'confirm'}
-          btnText={'Да'} 
-        >
-        </PopupWithForm>
+        <ConfirmationPopup 
+          card={selectedCard} 
+          onClose={closeAllPopups} 
+          isOpen={isConfirmationPopupOpen} 
+        />
       </div>
     </CurrentUserContext.Provider>
   );
